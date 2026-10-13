@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: server starts and serves data
+        run: |
+          SM_CALM=1 node server.js &
+          sleep 2
+          curl -fsS localhost:4010/v1/health
+          curl -fsS localhost:4010/v1/accounts | grep -q acc_4821
+          curl -fsS 'localhost:4010/v1/transactions?limit=5' | grep -q next_cursor
